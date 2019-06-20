@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Order Invoice</string>
+
+    <string-array name="status">
+        <item>Please select status</item>
+        <item>Online</item>
+        <item>COD</item>
+    </string-array>
+</resources>
