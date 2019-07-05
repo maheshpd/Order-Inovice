@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -16,6 +15,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,21 +41,25 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    TextInputEditText idnumber, name, contact, email, rate, qty, totalamt, paid;
-    Spinner product, status_spinner;
+    TextInputEditText idnumber, name, contact, email, rate, gst, totalamt, paid;
+    Spinner category, status_spinner, product;
 
-    String sid, sname, scontact, semail, srate, sqty, stotalamt, spaid, sproduct, status;
+    String sid, sname, scontact, semail, srate, sqty, stotalamt, spaid, sproduct, status, scategory,pname,pprice;
 
     Button btn_submit, btn_decrease, btn_increase;
 
     //url
     String getdatafromInfusionUrl = "http://magicconversion.com/ctf-product-invoice/getcontact.php";
-    String getProductData = "http://magicconversion.com/ctf-product-invoice/getproduct.php";
+    String getCategoryData = "http://magicconversion.com/ctf-product-invoice/getcategory.php";
     String insertData = " http://magicconversion.com/ctf-product-invoice/insertinvoice.php";
+    String getProductData = "http://magicconversion.com/ctf-product-invoice/getproduct.php";
 
     //Array List
+//    ArrayList<String> categoryList = new ArrayList<>();
+    ArrayList<ProductModel> categoryList = new ArrayList<>();
     ArrayList<List<String>> list = new ArrayList<>();
     final ArrayList<String> list1 = new ArrayList<>();
+    ArrayList<String> categoryList1 = new ArrayList<>();
     private ProgressDialog progressDialog;
 
     int minteger = 1;
@@ -63,6 +67,9 @@ public class MainActivity extends AppCompatActivity {
 
     TextView quantity1;
 
+    CategoryAdapter adapter;
+
+    String categoryid;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,21 +78,25 @@ public class MainActivity extends AppCompatActivity {
         progressDialog = new ProgressDialog(this);
 
 
+        category = findViewById(R.id.category);
         product = findViewById(R.id.product);
         idnumber = findViewById(R.id.IDNumber);
         name = findViewById(R.id.name);
         contact = findViewById(R.id.contact);
         email = findViewById(R.id.email);
         rate = findViewById(R.id.rate);
-//        qty = findViewById(R.id.qty);
+        gst = findViewById(R.id.gst);
         totalamt = findViewById(R.id.totalamt);
         paid = findViewById(R.id.paid);
         quantity1 = findViewById(R.id.quantity);
         status_spinner = findViewById(R.id.status_spinner);
 
-        btn_decrease = (Button) findViewById(R.id.decrease);
-        btn_increase = (Button) findViewById(R.id.increase);
-        btn_submit = (Button) findViewById(R.id.submit);
+        btn_decrease = findViewById(R.id.decrease);
+        btn_increase = findViewById(R.id.increase);
+        btn_submit = findViewById(R.id.submit);
+
+        adapter = new CategoryAdapter(this, categoryList);
+        category.setAdapter(adapter);
 
         name.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -100,6 +111,38 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        rate.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                if (i == EditorInfo.IME_ACTION_NEXT) {
+
+                    getGstNo();
+
+//                    Toast.makeText(MainActivity.this, String.valueOf(rate), Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+                return false;
+            }
+        });
+//        rate.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable editable) {
+//                double amount = Double.parseDouble(srate);
+//                double rate = (amount /100) * 18;
+//                Toast.makeText(MainActivity.this, String.valueOf(rate), Toast.LENGTH_SHORT).show();
+////                totalamt.setText(String.valueOf(rate));
+//            }
+//        });
         name.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -116,22 +159,52 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        gst.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if (b) {
+                    rate.requestFocus();
+                    if (rate.length() == 0) {
+                        Toast.makeText(MainActivity.this, "Enter rate field", Toast.LENGTH_SHORT).show();
+                    } else {
+                        getGstNo();
+                    }
+                }
+            }
+        });
 
-        getProduct();
+        getCategory();
+
+        category.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+
+                ProductModel pm = (ProductModel) adapterView.getItemAtPosition(i);
+
+                categoryid = pm.getId();
+                scategory = pm.getName();
+//                Toast.makeText(MainActivity.this, categoryid, Toast.LENGTH_SHORT).show();
+
+                if (scategory.equals("Please select Category")) {
+                    Toast.makeText(MainActivity.this, "Please select Category", Toast.LENGTH_SHORT).show();
+                }else {
+                    getProduct(categoryid);
+
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
 
         product.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-
-                if (list.get(i).get(0).equals("Please select Product")) {
-
-                    Toast.makeText(MainActivity.this, "Please select product", Toast.LENGTH_SHORT).show();
-                } else {
-
-                    sproduct = product.getSelectedItem().toString();
-                    String price = list.get(i).get(1);
-                    rate.setText(price);
-                }
+                sproduct = product.getSelectedItem().toString();
+                String price = list.get(i).get(1);
+                rate.setText(price);
             }
 
             @Override
@@ -153,22 +226,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        quantity1.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                totalamt.setText(s);
-            }
-        });
+//        quantity1.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//                totalamt.setText(s);
+//            }
+//        });
 
         btn_decrease.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -184,6 +257,57 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void getGstNo() {
+        srate = rate.getText().toString().trim();
+        double amount = Double.parseDouble(srate);
+        double rate = (amount /100) * 18;
+        gst.setText(String.valueOf(rate));
+    }
+
+    private void getProduct(final String categoryid) {
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Please wait...");
+        progressDialog.setCanceledOnTouchOutside(false);
+        progressDialog.show();
+        list.clear();
+        list1.clear();
+        RequestQueue queue = Volley.newRequestQueue(this);
+        StringRequest sr = new StringRequest(Request.Method.POST, getProductData, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONArray array = new JSONArray(response);
+                    for (int i = 0; i < array.length(); i++) {
+                        JSONObject c = array.getJSONObject(i);
+                        pname = c.getString("name");
+                        pprice = c.getString("price");
+                        list.add(Arrays.asList(pname,pprice));
+                        list1.add(pname);
+                        rate.setText(list.get(i).get(0));
+                        progressDialog.dismiss();
+                    }
+                    product.setAdapter(new ArrayAdapter<>(MainActivity.this,android.R.layout.simple_spinner_dropdown_item,list1));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("cat_id", categoryid);
+                return params;
+            }
+        };
+        queue.add(sr);
     }
 
     private void submitAmount() {
@@ -224,7 +348,7 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(String response) {
                 try {
                     JSONArray arr = new JSONArray(response);
-                    for (int i = 0; i <arr.length() ; i++) {
+                    for (int i = 0; i < arr.length(); i++) {
                         JSONObject c = arr.getJSONObject(0);
                         String message = c.getString("message");
                         Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
@@ -256,7 +380,7 @@ public class MainActivity extends AppCompatActivity {
                 params.put("name", sname);
                 params.put("email", semail);
                 params.put("phone", scontact);
-                params.put("product", sproduct);
+                params.put("category", sproduct);
                 params.put("price", srate);
                 params.put("paid_amount", spaid);
                 params.put("total", stotalamt);
@@ -287,12 +411,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void getProduct() {
+    private void getCategory() {
 
-        list.clear();
-        list1.clear();
+        categoryList.clear();
+        categoryList.add(new ProductModel("Please select Category"));
         RequestQueue queue = Volley.newRequestQueue(this);
-        StringRequest sr = new StringRequest(Request.Method.GET, getProductData, new Response.Listener<String>() {
+        StringRequest sr = new StringRequest(Request.Method.GET, getCategoryData, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 try {
@@ -300,14 +424,12 @@ public class MainActivity extends AppCompatActivity {
                     for (int i = 0; i < array.length(); i++) {
                         JSONObject c = array.getJSONObject(i);
 
+                        String id = c.getString("id");
                         String name = c.getString("name");
-                        String price = c.getString("price");
-//                        list.add(Arrays.asList("Please select Product", ""));
-                        list.add(Arrays.asList(name, price));
-                        list1.add(list.get(i).get(0));
-                    }
 
-                    product.setAdapter(new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, list1));
+                        categoryList.add(new ProductModel(id, name));
+                    }
+                    adapter.notifyDataSetChanged();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -318,14 +440,7 @@ public class MainActivity extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
 
             }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<>();
-                params.put("contactid", sid);
-                return params;
-            }
-        };
+        });
         queue.add(sr);
 
     }

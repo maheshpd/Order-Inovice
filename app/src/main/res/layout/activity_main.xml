@@ -21,6 +21,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/IDNumber"
                 android:layout_width="match_parent"
+                android:singleLine="true"
                 android:layout_height="wrap_content"
                 android:hint="ID Number"
                 android:inputType="number" />
@@ -38,6 +39,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Name"
+                android:singleLine="true"
                 android:inputType="text" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -53,6 +55,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Contact No"
+                android:singleLine="true"
                 android:inputType="phone" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -68,6 +71,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Email"
+                android:singleLine="true"
                 android:inputType="textEmailAddress" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -76,8 +80,43 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginLeft"
             android:layout_marginTop="5dp"
-            android:text="Product" />
+            android:text="Category" />
 
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/marginLeft"
+            android:layout_marginTop="@dimen/marginTop"
+            android:layout_marginEnd="@dimen/marginRight"
+            android:layout_marginRight="3dp"
+            android:layout_weight=".28"
+            android:background="@drawable/spinner_border"
+            android:orientation="horizontal">
+
+            <Spinner
+                android:id="@+id/category"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@android:color/transparent"
+                android:spinnerMode="dropdown" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_arrow_drop_down_black_24dp" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/marginLeft"
+            android:layout_marginTop="5dp"
+            android:text="Product"/>
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -107,7 +146,6 @@
 
         </RelativeLayout>
 
-
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -119,14 +157,31 @@
                 android:id="@+id/rate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:focusable="false"
+                android:singleLine="true"
                 android:hint="Rate" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/marginLeft"
+            android:layout_marginTop="@dimen/marginTop"
+            android:layout_marginEnd="@dimen/marginRight">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/gst"
+                android:layout_width="match_parent"
+                android:inputType="number"
+                android:singleLine="true"
+                android:layout_height="wrap_content"
+                android:hint="Gst" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginLeft"
+            android:visibility="gone"
             android:layout_marginTop="@dimen/marginTop"
             android:layout_marginEnd="@dimen/marginRight">
 
@@ -185,6 +240,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:enabled="false"
+                android:singleLine="true"
                 android:hint="Total Amt" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -200,6 +256,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Paid"
+                android:singleLine="true"
                 android:inputType="number" />
         </com.google.android.material.textfield.TextInputLayout>
 

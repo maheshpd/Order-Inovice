@@ -1,11 +1,23 @@
 package com.arfeenkhan.orderinvoice;
 
 public class ProductModel {
-    String name, price;
+    String id,name;
 
-    public ProductModel(String name, String price) {
+    public ProductModel(String name) {
         this.name = name;
-        this.price = price;
+    }
+
+    public ProductModel(String id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -14,13 +26,5 @@ public class ProductModel {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getPrice() {
-        return price;
-    }
-
-    public void setPrice(String price) {
-        this.price = price;
     }
 }
